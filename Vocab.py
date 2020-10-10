@@ -23,7 +23,7 @@ class Word:
 		s = f'''\n
 Word: {self.word}\n
 Type: {self.wordClass}\n
-Pronounciation: {self.pron}\n
+Pronunciation: {self.pron}\n
 Meaning: {self.meaning[:-1]}\n
 My Interpretation: {self.inter}\n
 Examples: {self.examples}\n
