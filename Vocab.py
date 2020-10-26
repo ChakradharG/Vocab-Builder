@@ -70,7 +70,7 @@ def fetch(rand=True):
 	soup = bs4.BeautifulSoup(page.text, 'html.parser')
 	body = soup.find('body')
 
-	word = str(body.find(class_='css-1jzk4d9 e1rg2mtf8').contents[0])
+	word = str(body.find(class_='css-13gkw1x e1rg2mtf5').contents[0])
 
 	pron = ''
 	for i in body.find(class_='pron-spell-content css-cqidvf evh0tcl2').contents:
@@ -148,6 +148,7 @@ def test():
 
 
 def dispVocab():
+	print(f'\nThere are {len(words)} words in your vocabulary')
 	for w in words:
 		print(w.word)
 
