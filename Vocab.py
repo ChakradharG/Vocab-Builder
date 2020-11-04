@@ -120,27 +120,41 @@ def fetch(rand=True):
 	temp.inter = input('Interpretation? ')
 
 	ch = input('Would you like to save this word?(Press y if yes) ')
-	if ch == 'y' or ch == 'Y':
+	if (ch == 'y' or ch == 'Y') and not search(word, False):
 		words.append(temp)
 
 
-def search():
-	inp = input('Word? ')
+def search(searchWord, show=True):
 	for w in words:
-		if w.word == inp:
-			print(w)
+		if w.word == searchWord:
+			print(w) if show else print(f'\n{searchWord} is already in your vocabulary')
+			return True
+	if show:
+		print('Word not found')
+	return False
+
+
+def update():
+	searchWord = input('Word? ')
+	for i in range(len(words)):
+		if words[i].word == searchWord:
+			print(words[i])
+			words[i].inter = input('New Interpretation? ')
 			break
 	else:
 		print('Word not found')
 
 
-def test():
+def test(reverse):
 	qCnt = int(input('How many questions? '))
 	temp = words[:]
 	x = len(temp)
 	for i in range(min(qCnt, x)):
 		w = random.randrange(0, x)
-		print(temp[w].word)
+		if reverse:
+			print(f'\n\n{temp[w].inter}\n', f'\n{temp[w].meaning[:-1]}')
+		else:
+			print(temp[w].word)
 		input('Check (Press Enter) ')
 		print(temp[w])
 		temp.pop(w)
@@ -160,23 +174,29 @@ def main():
 		while True:
 			ch = input('''
 1. Take a test
-2. Search for a word in your vocab
-3. Look up a new word online
-4. Look up a new random word online
-5. Explore your vocab
-6. Exit
+2. Take a reverse test
+3. Search for a word in your vocab
+4. Look up a new word online
+5. Look up a new random word online
+6. Explore your vocab
+7. Update a word
+8. Exit
 ''')
 
 			if ch == '1':
-				test()
+				test(False)
 			elif ch == '2':
-				search()
+				test(True)
 			elif ch == '3':
-				fetch(False)
+				search(input('Word? '))
 			elif ch == '4':
-				fetch()
+				fetch(False)
 			elif ch == '5':
+				fetch()
+			elif ch == '6':
 				dispVocab()
+			elif ch == '7':
+				update()
 			else:
 				break
 	except Exception as e:
