@@ -170,8 +170,8 @@ def dispVocab():
 def main():
 	loadData()
 
-	try:
-		while True:
+	while True:
+		try:
 			ch = input('''
 1. Take a test
 2. Take a reverse test
@@ -199,9 +199,11 @@ def main():
 				update()
 			else:
 				break
-	except Exception as e:
-		print(e)
-		input('Press enter to exit')
+		except Exception as e:
+			print(e)
+			ch = input('\nWould you like to exit?(Press y if yes) ')
+			if (ch == 'y' or ch =='Y'):
+				break
 
 	storeData()
 
