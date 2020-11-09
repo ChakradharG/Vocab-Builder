@@ -162,9 +162,11 @@ def test(reverse):
 
 
 def dispVocab():
-	print(f'\nThere are {len(words)} words in your vocabulary')
-	for w in words:
-		print(w.word)
+	for i, w in enumerate(words):
+		if i % 10 == 0:
+			print()
+		print('{:<20}'.format(w.word), end='')
+	print(f'\n\nThere are {len(words)} words in your vocabulary')
 
 
 def main():
