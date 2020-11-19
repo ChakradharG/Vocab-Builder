@@ -8,6 +8,17 @@ URL = f'https://dictionary.com/'
 words = []
 letters = [chr(i) for i in range(65, 91)]
 
+# HTML ID Strings
+LAST_PAGE_ID = 'css-3w1ibo e1wvt9ur6'
+WORD_LIST_ID = 'css-1y59cbu e1j8zk4s0'
+WORD_ID = 'css-2m2rhw e1wg9v5m3'
+PRON_ID = 'pron-spell-content css-1k8pnqm evh0tcl2'
+WORD_CLASS_ID = 'css-chpztc e1hk9ate2'
+TOP_MEANING_ID = 'css-1o58fj8 e1hk9ate4'
+MEANING_ID = 'one-click-content css-17f75g0 e1q3nk1v4'
+SYN_ID = 'css-cilpq1 e15p0a5t1'
+EX_ID = 'one-click-content css-1pfxpp4 e15kc6du6'
+
 
 class Word:
 	def __init__(self, word, wordClass, pron, meaning, syn, ex):
@@ -49,7 +60,7 @@ def fetch(rand=True):
 		let = random.choice(letters)
 		pre = requests.get(f'{URL}list/{let}')
 		soup = bs4.BeautifulSoup(pre.text, 'html.parser')
-		last = soup.find(class_='css-3w1ibo e1wvt9ur6').contents[0]
+		last = soup.find(class_= LAST_PAGE_ID).contents[0]
 		num = ''
 		for i in last['href'][::-1]:
 			if i == '/':
@@ -59,7 +70,7 @@ def fetch(rand=True):
 
 		pre = requests.get(f'{URL}list/{let}/{num}')
 		soup = bs4.BeautifulSoup(pre.text, 'html.parser')
-		lis = soup.find(class_='css-1y59cbu e1j8zk4s0').contents
+		lis = soup.find(class_= WORD_LIST_ID).contents
 		num = random.randint(1, len(lis))
 		inp = lis[num].contents[0].contents[0]
 
@@ -70,10 +81,10 @@ def fetch(rand=True):
 	soup = bs4.BeautifulSoup(page.text, 'html.parser')
 	body = soup.find('body')
 
-	word = str(body.find(class_='css-13gkw1x e1rg2mtf5').contents[0])
+	word = str(body.find(class_= WORD_ID).contents[0])
 
 	pron = ''
-	for i in body.find(class_='pron-spell-content css-cqidvf evh0tcl2').contents:
+	for i in body.find(class_= PRON_ID).contents:
 		if type(i) == bs4.element.NavigableString:
 			pron += i
 		else:
@@ -81,7 +92,7 @@ def fetch(rand=True):
 	pron = pron.replace('\u2009', ' _')
 
 	wordClass = []
-	for i in body.find_all(class_='css-chpztc e1hk9ate2'):
+	for i in body.find_all(class_= WORD_CLASS_ID):
 		try:
 			wordClass.append(str(i.contents[0].contents[0]))
 		except:
@@ -89,8 +100,8 @@ def fetch(rand=True):
 
 
 	meaning = []
-	for i in body.find_all(class_='css-1o58fj8 e1hk9ate4'):
-		for j in i.find_all(class_='one-click-content css-17f75g0 e1q3nk1v4'):
+	for i in body.find_all(class_= TOP_MEANING_ID):
+		for j in i.find_all(class_= MEANING_ID):
 			x = ''
 			for k in j.contents:
 				if type(k) == bs4.element.NavigableString:
@@ -102,11 +113,11 @@ def fetch(rand=True):
 		meaning.append('**********')
 
 	syn = []
-	for i in body.find_all(class_='css-cilpq1 e15p0a5t1')[:5]:
+	for i in body.find_all(class_= SYN_ID)[:5]:
 		syn.append(str(i.contents[0]))
 
 	ex = []
-	for i in body.find_all(class_='one-click-content css-1pfxpp4 e15kc6du6')[:3]:
+	for i in body.find_all(class_= EX_ID)[:3]:
 		k = ''
 		for j in i:
 			if type(j) == bs4.element.NavigableString:
