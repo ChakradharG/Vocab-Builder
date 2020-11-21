@@ -158,7 +158,8 @@ def update():
 
 def test(reverse):
 	qCnt = int(input('How many questions? '))
-	temp = words[:]
+	index = int(input('From how many recent words?(Press 0 to include the entire Vocab) '))
+	temp = words[-index:]
 	x = len(temp)
 	for i in range(min(qCnt, x)):
 		w = random.randrange(0, x)
@@ -176,7 +177,7 @@ def dispVocab():
 	for i, w in enumerate(words):
 		if i % 10 == 0:
 			print()
-		print('{:<20}'.format(w.word), end='')
+		print('{:<3} {:<19}'.format(i, w.word), end='')
 	print(f'\n\nThere are {len(words)} words in your vocabulary')
 
 
