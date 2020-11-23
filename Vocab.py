@@ -194,7 +194,8 @@ def main():
 5. Look up a new random word online
 6. Explore your vocab
 7. Update a word
-8. Exit
+8. Save progress made in current session
+9. Exit
 ''')
 
 			if ch == '1':
@@ -211,6 +212,8 @@ def main():
 				dispVocab()
 			elif ch == '7':
 				update()
+			elif ch == '8':
+				storeData()
 			else:
 				break
 		except Exception as e:
