@@ -4,7 +4,7 @@ import pickle
 import random
 
 
-URL = f'https://dictionary.com/'
+URL = 'https://dictionary.com/'
 words = []
 letters = [chr(i) for i in range(65, 91)]
 
@@ -73,7 +73,6 @@ def fetch(rand=True):
 		lis = soup.find(class_= WORD_LIST_ID).contents
 		num = random.randint(1, len(lis))
 		inp = lis[num].contents[0].contents[0]
-
 	else:
 		inp = input('Word? ')
 	
@@ -140,9 +139,34 @@ def search(searchWord, show=True):
 		if w.word == searchWord:
 			print(w) if show else print(f'\n{searchWord} is already in your vocabulary')
 			return True
+
 	if show:
 		print('Word not found')
 	return False
+
+
+def keyWordSearch(searchWords):
+	temp = []
+	for w in words:
+		if (w.word.find(searchWords) != -1):
+			temp.append(w)
+		elif (any(map(lambda x: x.find(searchWords) != -1, w.meaning))):
+			temp.append(w)
+		elif (w.inter.find(searchWords) != -1):
+			temp.append(w)
+		elif (any(map(lambda x: x.find(searchWords) != -1, w.synonyms))):
+			temp.append(w)
+
+	if temp == []:
+		print('\nNo matching words found')
+		return
+
+	print('\n', list(map(lambda x: x.word, temp)), sep='')
+	for w in temp:
+		ch = input('\nContinue with the definitions?(Press n if no) ')
+		if ch == 'n' or ch == 'N':
+			break
+		print(w)
 
 
 def update():
@@ -190,12 +214,13 @@ def main():
 1. Take a test
 2. Take a reverse test
 3. Search for a word in your vocab
-4. Look up a new word online
-5. Look up a new random word online
-6. Explore your vocab
-7. Update a word
-8. Save progress made in current session
-9. Exit
+4. Search for a word through keywords in its meaning
+5. Look up a new word online
+6. Look up a new random word online
+7. Explore your vocab
+8. Update a word
+9. Save progress made in current session
+0. Exit
 ''')
 
 			if ch == '1':
@@ -205,14 +230,16 @@ def main():
 			elif ch == '3':
 				search(input('Word? '))
 			elif ch == '4':
-				fetch(False)
+				keyWordSearch(input('Keyword(s)? '))
 			elif ch == '5':
-				fetch()
+				fetch(False)
 			elif ch == '6':
-				dispVocab()
+				fetch()
 			elif ch == '7':
-				update()
+				dispVocab()
 			elif ch == '8':
+				update()
+			elif ch == '9':
 				storeData()
 			else:
 				break
