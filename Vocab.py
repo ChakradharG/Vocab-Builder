@@ -44,6 +44,7 @@ Synonyms: {self.synonyms}\n
 
 
 def storeData():
+	print('Saving your work')
 	with open('Vocabulary', 'wb') as file:
 		pickle.dump(words, file)
 
@@ -54,8 +55,7 @@ def loadData():
 		words = pickle.load(file)
 
 
-def fetch(rand=True):
-	inp = ''
+def fetch(rand=True, inp=None):
 	if rand:
 		let = random.choice(letters)
 		pre = requests.get(f'{URL}list/{let}')
@@ -73,7 +73,7 @@ def fetch(rand=True):
 		lis = soup.find(class_= WORD_LIST_ID).contents
 		num = random.randint(1, len(lis))
 		inp = lis[num].contents[0].contents[0]
-	else:
+	elif inp == None:
 		inp = input('Word? ')
 	
 	page = requests.get(f'{URL}browse/{inp}')
@@ -141,7 +141,9 @@ def search(searchWord, show=True):
 			return True
 
 	if show:
-		print('Word not found')
+		ch = input('Word not found. Would you like to add it?(Press y if yes) ')
+		if ch == 'y' or ch == 'Y':
+			fetch(False, searchWord)
 	return False
 
 
@@ -159,6 +161,10 @@ def keyWordSearch(searchWords):
 
 	if temp == []:
 		print('\nNo matching words found')
+		if len(searchWords.split(' ')) == 1:
+			ch = input('Would you like to add it?(Press y if yes) ')
+			if ch == 'y' or ch == 'Y':
+				fetch(False, searchWords)
 		return
 
 	print('\n', list(map(lambda x: x.word, temp)), sep='')
@@ -206,9 +212,11 @@ def dispVocab():
 
 
 def main():
+	opCount = 0
 	loadData()
 
 	while True:
+		opCount += 1
 		try:
 			ch = input('''
 1. Take a test
@@ -246,8 +254,11 @@ def main():
 		except Exception as e:
 			print(e)
 			ch = input('\nWould you like to exit?(Press y if yes) ')
-			if (ch == 'y' or ch =='Y'):
+			if (ch == 'y' or ch == 'Y'):
 				break
+		if opCount % 5 == 0:
+			print('\nAuto-', end='')
+			storeData()
 
 	storeData()
 
