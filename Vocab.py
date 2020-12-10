@@ -129,8 +129,8 @@ def fetch(rand=True, inp=None):
 	print(temp)
 	temp.inter = input('Interpretation? ')
 
-	ch = input('Would you like to save this word?(Press y if yes) ')
-	if (ch == 'y' or ch == 'Y') and not search(word, False):
+	ch = input('Would you like to save this word?(Press y if yes) ').lower()
+	if ch == 'y' and not search(word, False):
 		words.append(temp)
 
 
@@ -141,8 +141,8 @@ def search(searchWord, show=True):
 			return True
 
 	if show:
-		ch = input('Word not found. Would you like to add it?(Press y if yes) ')
-		if ch == 'y' or ch == 'Y':
+		ch = input('Word not found. Would you like to add it?(Press y if yes) ').lower()
+		if ch == 'y':
 			fetch(False, searchWord)
 	return False
 
@@ -162,15 +162,15 @@ def keyWordSearch(searchWords):
 	if temp == []:
 		print('\nNo matching words found')
 		if len(searchWords.split(' ')) == 1:
-			ch = input('Would you like to add it?(Press y if yes) ')
-			if ch == 'y' or ch == 'Y':
+			ch = input('Would you like to add it?(Press y if yes) ').lower()
+			if ch == 'y':
 				fetch(False, searchWords)
 		return
 
 	print('\n', list(map(lambda x: x.word, temp)), sep='')
 	for w in temp:
-		ch = input('\nContinue with the definitions?(Press n if no) ')
-		if ch == 'n' or ch == 'N':
+		ch = input('\nContinue with the definitions?(Press n if no) ').lower()
+		if ch == 'n':
 			break
 		print(w)
 
@@ -253,8 +253,8 @@ def main():
 				break
 		except Exception as e:
 			print(e)
-			ch = input('\nWould you like to exit?(Press y if yes) ')
-			if (ch == 'y' or ch == 'Y'):
+			ch = input('\nWould you like to exit?(Press y if yes) ').lower()
+			if ch == 'y':
 				break
 		if opCount % 5 == 0:
 			print('\nAuto-', end='')
