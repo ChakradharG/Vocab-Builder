@@ -105,9 +105,11 @@ def fetch(rand=True, inp=None):
 			for k in j.contents:
 				if type(k) == bs4.element.NavigableString:
 					x += k
-				else:
-					if k.get('href', '') != '':
+				elif k.get('href', '') != '':
+					if type(k.contents[0]) == bs4.element.NavigableString:
 						x += k.contents[0]
+					elif type(k.contents[0].contents[0]) == bs4.element.NavigableString:
+						x += k.contents[0].contents[0]
 			meaning.append(x.replace(':', '.'))
 		meaning.append('**********')
 
