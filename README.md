@@ -5,7 +5,7 @@ A web scraper to help you build your vocabulary. Scrapes word definitions from [
 
 ## Getting Started
 * Clone this repository
-* Install the required modules (pip install -r ```requirements.txt```)
+* Install the required modules (pip install -r ```Requirements.txt```)
 * Run ```Vocab.py```
 
 <br>
