@@ -11,7 +11,7 @@ letters = [chr(i) for i in range(65, 91)]
 # HTML ID Strings
 LAST_PAGE_ID = 'css-3w1ibo e1wvt9ur6'
 WORD_LIST_ID = 'css-1y59cbu e1j8zk4s0'
-WORD_ID = 'css-2m2rhw e1wg9v5m3'
+WORD_ID = 'css-2m2rhw e1wg9v5m4'
 PRON_ID = 'pron-spell-content css-1k8pnqm evh0tcl2'
 WORD_CLASS_ID = 'css-chpztc e1hk9ate2'
 TOP_MEANING_ID = 'css-1o58fj8 e1hk9ate4'
