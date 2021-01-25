@@ -205,6 +205,23 @@ def test(reverse):
 		x -= 1
 
 
+def recall(temp):
+	wordCount = len(temp)
+	while wordCount > 0:
+		x = input(f'Word?({wordCount} words left. Press n to stop) ').lower()
+		if x == 'n':
+			break
+		for w in temp:
+			if w.word == x:
+				temp.remove(w)
+				wordCount -= 1
+				break
+		else:
+			print('Word not found')
+	print(f'\nYou recalled {len(words) - wordCount} words')
+	return temp
+
+
 def dispVocab():
 	for i, w in enumerate(words):
 		if i % 10 == 0:
@@ -216,6 +233,7 @@ def dispVocab():
 def main():
 	opCount = 0
 	loadData()
+	tempWords = words[:]
 
 	while True:
 		opCount += 1
@@ -230,6 +248,7 @@ def main():
 7. Explore your vocab
 8. Update a word
 9. Save progress made in current session
+a. Recall all words in your vocab
 0. Exit
 ''')
 
@@ -251,6 +270,8 @@ def main():
 				update()
 			elif ch == '9':
 				storeData()
+			elif ch == 'a':
+				tempWords = recall(tempWords)
 			else:
 				break
 		except Exception as e:
