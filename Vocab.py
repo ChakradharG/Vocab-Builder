@@ -9,15 +9,16 @@ words = []
 letters = [chr(i) for i in range(65, 91)]
 
 # HTML ID Strings
-LAST_PAGE_ID = 'css-3w1ibo e1wvt9ur6'
-WORD_LIST_ID = 'css-1y59cbu e1j8zk4s0'
-WORD_ID = 'css-2m2rhw e1wg9v5m4'
-PRON_ID = 'pron-spell-content css-1k8pnqm evh0tcl2'
-WORD_CLASS_ID = 'css-chpztc e1hk9ate2'
-TOP_MEANING_ID = 'css-1o58fj8 e1hk9ate4'
-MEANING_ID = 'one-click-content css-17f75g0 e1q3nk1v4'
-SYN_ID = 'css-cilpq1 e15p0a5t1'
-EX_ID = 'one-click-content css-1pfxpp4 e15kc6du6'
+LAST_PAGE_ID = 'css-3w1ibo e1wvt9ur0'
+WORD_LIST_ID = 'css-fq2xu3 e1j8zk4s0'
+WORD_LIST_ID_2 = 'css-hw664w-List e1j8zk4s0'
+WORD_ID = 'css-1c9l5j-getStyledHeading e1wg9v5m0'
+PRON_ID = 'pron-spell-content css-haaioc-PronSpellIpaContent evh0tcl1'
+WORD_CLASS_ID = 'css-1nsk4bc-BlockTitle e1hk9ate2'
+TOP_MEANING_ID = 'css-l5qngi-OrderedContentListContainer e1hk9ate0'
+MEANING_ID = 'one-click-content css-ana4le-PosSupportingInfo e1q3nk1v1'
+SYN_ID = 'css-o5jyym-RelatedWordLink e15p0a5t0'
+EX_ID = 'one-click-content css-fr4dvi-Sentence e15kc6du2'
 
 
 class Word:
@@ -70,7 +71,10 @@ def fetch(rand=True, inp=None):
 
 		pre = requests.get(f'{URL}list/{let}/{num}')
 		soup = bs4.BeautifulSoup(pre.text, 'html.parser')
-		lis = soup.find(class_= WORD_LIST_ID).contents
+		try:
+			lis = soup.find(class_= WORD_LIST_ID).contents
+		except:
+			lis = soup.find(class_= WORD_LIST_ID_2).contents
 		num = random.randint(1, len(lis))
 		inp = lis[num].contents[0].contents[0]
 	elif inp == None:
