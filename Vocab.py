@@ -1,24 +1,10 @@
 import requests
-import bs4
 import pickle
 import random
 
 
-URL = 'https://dictionary.com/'
+URL = 'https://api.dictionaryapi.dev/api/v2/entries/'
 words = []
-letters = [chr(i) for i in range(65, 91)]
-
-# HTML ID Strings
-LAST_PAGE_ID = 'css-3w1ibo e1wvt9ur0'
-WORD_LIST_ID = 'css-fq2xu3 e1j8zk4s0'
-WORD_LIST_ID_2 = 'css-hw664w-List e1j8zk4s0'
-WORD_ID = 'css-1c9l5j-getStyledHeading e1wg9v5m0'
-PRON_ID = 'pron-spell-content css-haaioc-PronSpellIpaContent evh0tcl1'
-WORD_CLASS_ID = 'css-1nsk4bc-BlockTitle e1hk9ate2'
-TOP_MEANING_ID = 'css-l5qngi-OrderedContentListContainer e1hk9ate0'
-MEANING_ID = 'one-click-content css-ana4le-PosSupportingInfo e1q3nk1v1'
-SYN_ID = 'css-o5jyym-RelatedWordLink e15p0a5t0'
-EX_ID = 'one-click-content css-fr4dvi-Sentence e15kc6du2'
 
 
 class Word:
@@ -56,81 +42,33 @@ def loadData():
 		words = pickle.load(file)
 
 
-def fetch(rand=True, inp=None):
-	if rand:
-		let = random.choice(letters)
-		pre = requests.get(f'{URL}list/{let}')
-		soup = bs4.BeautifulSoup(pre.text, 'html.parser')
-		last = soup.find(class_= LAST_PAGE_ID).contents[0]
-		num = ''
-		for i in last['href'][::-1]:
-			if i == '/':
-				break
-			num = i + num
-		num = random.randint(1, int(num))
-
-		pre = requests.get(f'{URL}list/{let}/{num}')
-		soup = bs4.BeautifulSoup(pre.text, 'html.parser')
-		try:
-			lis = soup.find(class_= WORD_LIST_ID).contents
-		except:
-			lis = soup.find(class_= WORD_LIST_ID_2).contents
-		num = random.randint(1, len(lis))
-		inp = lis[num].contents[0].contents[0]
-	elif inp == None:
+def fetch(inp=None):
+	if not inp:
 		inp = input('Word? ')
-	
-	page = requests.get(f'{URL}browse/{inp}')
-	soup = bs4.BeautifulSoup(page.text, 'html.parser')
-	body = soup.find('body')
 
-	word = str(body.find(class_= WORD_ID).contents[0])
+	page = requests.get(f'{URL}en_GB/{inp}')
+	print(page.json())
+	[ body ] = page.json()
 
-	pron = ''
-	for i in body.find(class_= PRON_ID).contents:
-		if type(i) == bs4.element.NavigableString:
-			pron += i
-		else:
-			pron += i.contents[0]
-	pron = pron.replace('\u2009', ' _')
+	word = body.get('word')
+
+	pron = []
+	for i in body.get('phonetics'):
+		pron.append(i.get('text'))
 
 	wordClass = []
-	for i in body.find_all(class_= WORD_CLASS_ID):
-		try:
-			wordClass.append(str(i.contents[0].contents[0]))
-		except:
-			continue
-
-
 	meaning = []
-	for i in body.find_all(class_= TOP_MEANING_ID):
-		for j in i.find_all(class_= MEANING_ID):
-			x = ''
-			for k in j.contents:
-				if type(k) == bs4.element.NavigableString:
-					x += k
-				elif k.get('href', '') != '':
-					if type(k.contents[0]) == bs4.element.NavigableString:
-						x += k.contents[0]
-					elif type(k.contents[0].contents[0]) == bs4.element.NavigableString:
-						x += k.contents[0].contents[0]
-			meaning.append(x.replace(':', '.'))
-		meaning.append('**********')
-
 	syn = []
-	for i in body.find_all(class_= SYN_ID)[:5]:
-		syn.append(str(i.contents[0]))
-
 	ex = []
-	for i in body.find_all(class_= EX_ID)[:3]:
-		k = ''
-		for j in i:
-			if type(j) == bs4.element.NavigableString:
-				k += j
-			else:
-				k += j.contents[0]
-		ex.append(k)
-
+	for i in body.get('meanings'):
+		wordClass.append(i.get('partOfSpeech'))
+		for j in i.get('definitions'):
+			meaning.append(j.get('definition'))
+			if j.get('synonyms'):
+				syn.extend(j.get('synonyms'))
+			ex.append(j.get('example'))
+		meaning.append('**********')
+	
 	temp = Word(word, wordClass, pron, meaning, syn, ex)
 	print(temp)
 	temp.inter = input('Interpretation? ')
@@ -149,7 +87,7 @@ def search(searchWord, show=True):
 	if show:
 		ch = input('Word not found. Would you like to add it?(Press y if yes) ').lower()
 		if ch == 'y':
-			fetch(False, searchWord)
+			fetch(searchWord)
 	return False
 
 
@@ -170,7 +108,7 @@ def keyWordSearch(searchWords):
 		if len(searchWords.split(' ')) == 1:
 			ch = input('Would you like to add it?(Press y if yes) ').lower()
 			if ch == 'y':
-				fetch(False, searchWords)
+				fetch(searchWords)
 		return
 
 	print('\n', list(map(lambda x: x.word, temp)), sep='')
@@ -237,7 +175,7 @@ def dispVocab():
 def main():
 	opCount = 0
 	loadData()
-	tempWords = words[:]
+	tempWords = None
 
 	while True:
 		opCount += 1
@@ -248,12 +186,11 @@ def main():
 3. Search for a word in your vocab
 4. Search for a word through keywords in its meaning
 5. Look up a new word online
-6. Look up a new random word online
-7. Explore your vocab
-8. Update a word
-9. Save progress made in current session
-a. Recall all words in your vocab
-0. Exit
+6. Explore your vocab
+7. Update a word
+8. Save progress made in current session
+9. Recall all words in your vocab
+0. Exit 
 ''')
 
 			if ch == '1':
@@ -265,16 +202,16 @@ a. Recall all words in your vocab
 			elif ch == '4':
 				keyWordSearch(input('Keyword(s)? '))
 			elif ch == '5':
-				fetch(False)
-			elif ch == '6':
 				fetch()
-			elif ch == '7':
+			elif ch == '6':
 				dispVocab()
-			elif ch == '8':
+			elif ch == '7':
 				update()
-			elif ch == '9':
+			elif ch == '8':
 				storeData()
-			elif ch == 'a':
+			elif ch == '9':
+				if not tempWords:
+					tempWords = words[:]
 				tempWords = recall(tempWords)
 			else:
 				break
