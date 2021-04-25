@@ -1,5 +1,5 @@
 # Vocab-Builder
-A web scraper to help you build your vocabulary. Scrapes word definitions from [dictionary.com](https://dictionary.com).
+A tool to help you build your vocabulary. Gets word definitions from [The Free Dictionary API](https://dictionaryapi.dev/).
 
 <br>
 
@@ -16,3 +16,7 @@ A web scraper to help you build your vocabulary. Scrapes word definitions from [
 * Choose one of the available options
 
 (Note: The code auto-saves your word-list after every 5 operations)
+
+<br>
+
+If this project helped you then consider [donating](https://github.com/meetDeveloper/freeDictionaryAPI) to the developer of The Free Dictionary API.
