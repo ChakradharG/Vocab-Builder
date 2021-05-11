@@ -47,7 +47,6 @@ def fetch(inp=None):
 		inp = input('Word? ')
 
 	page = requests.get(f'{URL}en_GB/{inp}')
-	print(page.json())
 	[ body ] = page.json()
 
 	word = body.get('word')
