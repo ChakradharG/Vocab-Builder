@@ -1,10 +1,20 @@
 import requests
+import bs4
 import pickle
 import random
 
 
-URL = 'https://api.dictionaryapi.dev/api/v2/entries/'
+URL = 'https://dictionary.com/'
 words = []
+
+# HTML Class Strings
+WORD_ID = 'css-1sprl0b e1wg9v5m5'
+PRON_ID = 'pron-spell-content css-7iphl0 evh0tcl1'
+WORD_CLASS_ID = 'css-1b1gas3 e1hk9ate2'
+TOP_MEANING_ID = 'css-10n3ydx e1hk9ate0'
+MEANING_ID = 'one-click-content css-nnyc96 e1q3nk1v1'
+SYN_ID = 'css-1icv1bo e15p0a5t0'
+EX_ID = 'one-click-content css-b5q2lz e15kc6du2'
 
 
 class Word:
@@ -43,31 +53,60 @@ def loadData():
 
 
 def fetch(inp=None):
-	if not inp:
+	if inp is None:
 		inp = input('Word? ')
+	
+	page = requests.get(f'{URL}browse/{inp}')
+	soup = bs4.BeautifulSoup(page.text, 'html.parser')
+	body = soup.find('body')
 
-	page = requests.get(f'{URL}en_GB/{inp}')
-	[ body ] = page.json()
+	word = str(body.find(class_= WORD_ID).contents[0])
 
-	word = body.get('word')
-
-	pron = []
-	for i in body.get('phonetics'):
-		pron.append(i.get('text'))
+	pron = ''
+	for i in body.find(class_= PRON_ID).contents:
+		if type(i) == bs4.element.NavigableString:
+			pron += i
+		else:
+			pron += i.contents[0]
+	pron = pron.replace('\u2009', ' _')
 
 	wordClass = []
+	for i in body.find_all(class_= WORD_CLASS_ID):
+		try:
+			wordClass.append(str(i.contents[0].contents[0]))
+		except:
+			continue
+
+
 	meaning = []
-	syn = []
-	ex = []
-	for i in body.get('meanings'):
-		wordClass.append(i.get('partOfSpeech'))
-		for j in i.get('definitions'):
-			meaning.append(j.get('definition'))
-			if j.get('synonyms'):
-				syn.extend(j.get('synonyms'))
-			ex.append(j.get('example'))
+	for i in body.find_all(class_= TOP_MEANING_ID):
+		for j in i.find_all(class_= MEANING_ID):
+			x = ''
+			for k in j.contents:
+				if type(k) == bs4.element.NavigableString:
+					x += k
+				elif k.get('href', '') != '':
+					if type(k.contents[0]) == bs4.element.NavigableString:
+						x += k.contents[0]
+					elif type(k.contents[0].contents[0]) == bs4.element.NavigableString:
+						x += k.contents[0].contents[0]
+			meaning.append(x.replace(':', '.'))
 		meaning.append('**********')
-	
+
+	syn = []
+	for i in body.find_all(class_= SYN_ID)[:5]:
+		syn.append(str(i.contents[0]))
+
+	ex = []
+	for i in body.find_all(class_= EX_ID)[:3]:
+		k = ''
+		for j in i:
+			if type(j) == bs4.element.NavigableString:
+				k += j
+			else:
+				k += j.contents[0]
+		ex.append(k)
+
 	temp = Word(word, wordClass, pron, meaning, syn, ex)
 	print(temp)
 	temp.inter = input('Interpretation? ')
@@ -189,7 +228,7 @@ def main():
 7. Update a word
 8. Save progress made in current session
 9. Recall all words in your vocab
-0. Exit 
+0. Exit
 ''')
 
 			if ch == '1':
