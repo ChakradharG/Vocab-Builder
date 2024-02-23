@@ -204,7 +204,7 @@ def recall(temp):
 
 def dispVocab():
 	for i, w in enumerate(words):
-		if i % 10 == 0:
+		if i % 5 == 0:
 			print()
 		print('{:<3} {:<19}'.format(i, w.word), end='')
 	print(f'\n\nThere are {len(words)} words in your vocabulary')
