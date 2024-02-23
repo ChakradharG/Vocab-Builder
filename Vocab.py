@@ -172,17 +172,14 @@ def test(reverse):
 	qCnt = int(input('How many questions? '))
 	index = int(input('From how many recent words?(Press 0 to include the entire Vocab) '))
 	temp = words[-index:]
-	x = len(temp)
-	for i in range(min(qCnt, x)):
-		w = random.randrange(0, x)
+	random.shuffle(temp)
+	for i in range(min(qCnt, len(temp))):
 		if reverse:
-			print(f'\n\n{temp[w].inter}\n', f'\n{temp[w].meaning[:-1]}')
+			print(f'\n\n{temp[i].inter}\n', f'\n{temp[i].meaning[:-1]}')
 		else:
-			print(temp[w].word)
+			print(temp[i].word)
 		input('Check (Press Enter) ')
-		print(temp[w])
-		temp.pop(w)
-		x -= 1
+		print(temp[i])
 
 
 def recall(temp):
