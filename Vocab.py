@@ -5,7 +5,6 @@ import random
 
 
 URL = 'https://dictionary.com/'
-words = []
 
 # HTML Class Strings
 WORD_ID = 'css-1sprl0b e1wg9v5m5'
@@ -47,9 +46,8 @@ def storeData():
 
 
 def loadData():
-	global words
 	with open('Vocabulary', 'rb') as file:
-		words = pickle.load(file)
+		return pickle.load(file)
 
 
 def fetch(inp=None):
@@ -209,7 +207,6 @@ def dispVocab():
 
 def main():
 	opCount = 0
-	loadData()
 	tempWords = None
 
 	while True:
@@ -263,4 +260,5 @@ def main():
 
 
 if __name__ == '__main__':
+	words = loadData()
 	main()
