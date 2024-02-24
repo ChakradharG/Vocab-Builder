@@ -17,24 +17,24 @@ EX_ID = 'one-click-content css-b5q2lz e15kc6du2'
 
 
 class Word:
-	def __init__(self, word, wordClass, pron, meaning, syn, ex):
+	def __init__(self, word, wordClass, meaning, examples, synonyms, antonyms):
 		self.word = word
 		self.wordClass = wordClass
-		self.pron = pron
 		self.meaning = meaning
 		self.inter = None
-		self.examples = ex
-		self.synonyms = syn
+		self.examples = examples
+		self.synonyms = synonyms
+		self.antonyms = antonyms
 
 	def __str__(self):
 		s = f'''\n
 Word: {self.word}\n
 Type: {self.wordClass}\n
-Pronunciation: {self.pron}\n
-Meaning: {self.meaning[:-1]}\n
+Meaning: {self.meaning}\n
 My Interpretation: {self.inter}\n
 Examples: {self.examples}\n
 Synonyms: {self.synonyms}\n
+Antonyms: {self.antonyms}\n
 '''
 		return s
 
