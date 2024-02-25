@@ -1,5 +1,5 @@
 import requests
-import bs4
+import os
 import pickle
 import random
 
@@ -69,8 +69,11 @@ def storeData():
 
 
 def loadData():
-	with open('Vocabulary', 'rb') as file:
-		return pickle.load(file)
+	if os.path.exists('./Vocabulary'):
+		with open('Vocabulary', 'rb') as file:
+			return pickle.load(file)
+	else:
+		return []
 
 
 def buildTrie():
