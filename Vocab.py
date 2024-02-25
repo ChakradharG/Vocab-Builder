@@ -25,6 +25,8 @@ class Word:
 		self.examples = examples
 		self.synonyms = synonyms
 		self.antonyms = antonyms
+		self.index = Word.n
+		Word.n += 1
 
 	def __str__(self):
 		s = f'''\n
@@ -40,28 +42,6 @@ Antonyms: {self.antonyms}\n
 		return s
 
 
-class TrieNode():
-	def __init__(self):
-		self.dictionary = {}
-		self.endsHere = None
-
-	def add(self, w):
-		node = self
-		for c in w.word:
-			if c not in node.dictionary:
-				node.dictionary[c] = TrieNode()
-			node = node.dictionary[c]
-		node.endsHere = w
-
-	def search(self, word):
-		node = self
-		for c in word:
-			if c not in node.dictionary:
-				return None
-			node = node.dictionary[c]
-		return node.endsHere
-
-
 def storeData():
 	print('Saving your work')
 	with open('Vocabulary', 'wb') as file:
@@ -73,14 +53,12 @@ def loadData():
 		with open('Vocabulary', 'rb') as file:
 			return pickle.load(file)
 	else:
-		return []
+		return {}
 
 
-def buildTrie():
-	trie = TrieNode()
-	for w in words:
-		trie.add(w)
-	return trie
+def fetch(word=None):
+	if word is None:
+		word = input('Word? ')
 
 
 	word = str(body.find(class_= WORD_ID).contents[0])
@@ -144,7 +122,7 @@ def buildTrie():
 
 
 def findByWord(word):
-	w = trie.search(word)
+	w = words.get(word, None)
 	if w is not None:
 		print(w)
 	else:
@@ -181,13 +159,11 @@ def keyWordSearch(searchWords):
 		print(w)
 
 
-def update():
-	searchWord = input('Word? ')
-	for i in range(len(words)):
-		if words[i].word == searchWord:
-			print(words[i])
-			words[i].inter = input('New Interpretation? ')
-			break
+def update(word):
+	w = words.get(word, None)
+	if w is not None:
+		print(w)
+		w.inter = input('New Interpretation? ')
 	else:
 		print('Word not found')
 
@@ -264,7 +240,7 @@ def main():
 			elif ch == '6':
 				dispVocab()
 			elif ch == '7':
-				update()
+				update(input('Word? '))
 			elif ch == '8':
 				storeData()
 			elif ch == '9':
@@ -287,5 +263,5 @@ def main():
 
 if __name__ == '__main__':
 	words = loadData()
-	trie = buildTrie()
+	Word.n = len(words)
 	main()
