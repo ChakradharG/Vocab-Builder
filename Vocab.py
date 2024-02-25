@@ -132,21 +132,22 @@ def buildTrie():
 	temp.inter = input('Interpretation? ')
 
 	ch = input('Would you like to save this word?(Press y if yes) ').lower()
-	if ch == 'y' and not search(word, False):
-		words.append(temp)
+	if ch == 'y':
+		if trie.search(word) is not None:
+			print(f'\n{word} is already in your vocabulary')
+		else:
+			words.append(newWord)
+			trie.add(newWord)
 
 
-def search(searchWord, show=True):
-	for w in words:
-		if w.word == searchWord:
-			print(w) if show else print(f'\n{searchWord} is already in your vocabulary')
-			return True
-
-	if show:
+def findByWord(word):
+	w = trie.search(word)
+	if w is not None:
+		print(w)
+	else:
 		ch = input('Word not found. Would you like to add it?(Press y if yes) ').lower()
 		if ch == 'y':
-			fetch(searchWord)
-	return False
+			fetch(word)
 
 
 def keyWordSearch(searchWords):
@@ -252,7 +253,7 @@ def main():
 			elif ch == '2':
 				test(True)
 			elif ch == '3':
-				search(input('Word? '))
+				findByWord(input('Word? '))
 			elif ch == '4':
 				keyWordSearch(input('Keyword(s)? '))
 			elif ch == '5':
