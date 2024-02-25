@@ -35,8 +35,31 @@ My Interpretation: {self.inter}\n
 Examples: {self.examples}\n
 Synonyms: {self.synonyms}\n
 Antonyms: {self.antonyms}\n
+--------------------------------------------------
 '''
 		return s
+
+
+class TrieNode():
+	def __init__(self):
+		self.dictionary = {}
+		self.endsHere = None
+
+	def add(self, w):
+		node = self
+		for c in w.word:
+			if c not in node.dictionary:
+				node.dictionary[c] = TrieNode()
+			node = node.dictionary[c]
+		node.endsHere = w
+
+	def search(self, word):
+		node = self
+		for c in word:
+			if c not in node.dictionary:
+				return None
+			node = node.dictionary[c]
+		return node.endsHere
 
 
 def storeData():
@@ -50,13 +73,12 @@ def loadData():
 		return pickle.load(file)
 
 
-def fetch(inp=None):
-	if inp is None:
-		inp = input('Word? ')
-	
-	page = requests.get(f'{URL}browse/{inp}')
-	soup = bs4.BeautifulSoup(page.text, 'html.parser')
-	body = soup.find('body')
+def buildTrie():
+	trie = TrieNode()
+	for w in words:
+		trie.add(w)
+	return trie
+
 
 	word = str(body.find(class_= WORD_ID).contents[0])
 
@@ -252,13 +274,14 @@ def main():
 			ch = input('\nWould you like to exit?(Press y if yes) ').lower()
 			if ch == 'y':
 				break
-		if opCount % 5 == 0:
-			print('\nAuto-', end='')
+		if opCount == 5:
 			storeData()
+			opCount = 0
 
 	storeData()
 
 
 if __name__ == '__main__':
 	words = loadData()
+	trie = buildTrie()
 	main()
