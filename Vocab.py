@@ -7,7 +7,43 @@ import json
 
 URL = 'http://localhost:11434/api/generate'
 MODEL = ''
+SYSTEM_PROMPT1 = '''
+You are an expert linguist and educator specializing in vocabulary enhancement. Your task is to provide clear and informative definitions for words to help users expand their vocabulary. For the given word, please provide the word's:
 
+1. part of speech
+2. definitions
+3. examples uses
+4. synonyms
+5. antonyms
+
+Your response should be in valid JSON with the following format:
+
+{
+	"wordClass": "<part of speech>",
+	"meaning": ["<definition 1>", "<definition 2>", ...],
+	"examples": ["<example 1>", "<example 2>", ...],
+	"synonyms": ["<synonym 1>", "<synonym 2>", ...],
+	"antonyms": ["<antonym 1>", "<antonym 2>", ...]
+}
+
+Examples:
+
+response 1: {
+	"wordClass": "adjective",
+	"meaning": ["Occurring at irregular intervals or only in a few places; scattered or isolated.", "Not constant, frequent, or predictable."],
+	"examples": ["Sporadic rainfall during the drought period is not uncommon.", "The patient's symptoms are sporadic and difficult to diagnose accurately without thorough investigation."],
+	"synonyms": ["Intermittent", "Irregular", "Infrequent"],
+	"antonyms": ["Consistent", "Regular", "Frequent"]
+}
+
+response 2: {
+	"wordClass": "noun",
+	"meaning": ["A situation or problem that is impossible to solve.", "An overwhelming obstacle, challenge, or difficulty."],
+	"examples": ["The mountain was so insurmountable; no one dared attempt it without proper equipment and training.", "Many found the political situation in certain countries to be an insurmountable task due to pervasive corruption and unrest."],
+	"synonyms": ["insuperable", "unassailable"],
+	"antonyms": ["solvable situation", "assailable"]
+}
+'''
 SYSTEM_PROMPT2 = '''
 You are an expert linguist. You will be provided with a list of words and a description in the following format:
 {
@@ -79,63 +115,32 @@ def callAPI(payload):
 
 
 def fetch(word):
+	body = callAPI({
+			'model': MODEL,
+			'system': SYSTEM_PROMPT1,
+			'prompt': word,
+			'temperature': 0.0,
+			'format': 'json',
+			'stream': False
+	})
 
-	pron = ''
-	for i in body.find(class_= PRON_ID).contents:
-		if type(i) == bs4.element.NavigableString:
-			pron += i
-		else:
-			pron += i.contents[0]
-	pron = pron.replace('\u2009', ' _')
+	wordClass = body['wordClass']
+	meaning = body['meaning']
+	examples = body['examples']
+	synonyms = body['synonyms']
+	antonyms = body['antonyms']
 
-	wordClass = []
-	for i in body.find_all(class_= WORD_CLASS_ID):
-		try:
-			wordClass.append(str(i.contents[0].contents[0]))
-		except:
-			continue
-
-
-	meaning = []
-	for i in body.find_all(class_= TOP_MEANING_ID):
-		for j in i.find_all(class_= MEANING_ID):
-			x = ''
-			for k in j.contents:
-				if type(k) == bs4.element.NavigableString:
-					x += k
-				elif k.get('href', '') != '':
-					if type(k.contents[0]) == bs4.element.NavigableString:
-						x += k.contents[0]
-					elif type(k.contents[0].contents[0]) == bs4.element.NavigableString:
-						x += k.contents[0].contents[0]
-			meaning.append(x.replace(':', '.'))
-		meaning.append('**********')
-
-	syn = []
-	for i in body.find_all(class_= SYN_ID)[:5]:
-		syn.append(str(i.contents[0]))
-
-	ex = []
-	for i in body.find_all(class_= EX_ID)[:3]:
-		k = ''
-		for j in i:
-			if type(j) == bs4.element.NavigableString:
-				k += j
-			else:
-				k += j.contents[0]
-		ex.append(k)
-
-	temp = Word(word, wordClass, pron, meaning, syn, ex)
-	print(temp)
-	temp.inter = input('Interpretation? ')
+	newW = Word(word, wordClass, meaning, examples, synonyms, antonyms)
+	print(newW)
+	newW.inter = input('Interpretation? ')
 
 	ch = input('Would you like to save this word?(Press y if yes) ').lower()
 	if ch == 'y':
-		if trie.search(word) is not None:
+		w = words.get(word, None)
+		if w is not None:
 			print(f'\n{word} is already in your vocabulary')
 		else:
-			words.append(newWord)
-			trie.add(newWord)
+			words[word] = newW
 
 
 def findByWord(word):
