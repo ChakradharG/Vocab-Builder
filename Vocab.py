@@ -2,18 +2,35 @@ import requests
 import os
 import pickle
 import random
+import json
 
 
-URL = 'https://dictionary.com/'
+URL = 'http://localhost:11434/api/generate'
+MODEL = ''
 
-# HTML Class Strings
-WORD_ID = 'css-1sprl0b e1wg9v5m5'
-PRON_ID = 'pron-spell-content css-7iphl0 evh0tcl1'
-WORD_CLASS_ID = 'css-1b1gas3 e1hk9ate2'
-TOP_MEANING_ID = 'css-10n3ydx e1hk9ate0'
-MEANING_ID = 'one-click-content css-nnyc96 e1q3nk1v1'
-SYN_ID = 'css-1icv1bo e15p0a5t0'
-EX_ID = 'one-click-content css-b5q2lz e15kc6du2'
+SYSTEM_PROMPT2 = '''
+You are an expert linguist. You will be provided with a list of words and a description in the following format:
+{
+	"words": ["word 1", "word 2", ...],
+	"description": "description of some word"
+}
+
+Your task is to identify which words in the list strongly match the description, if a lot of words match then return the top 3 closest words. Your response should be in valid JSON with the following format:
+
+{
+	"matches": ["matching word 1", "matching word 2", "matching word 3"]
+}
+
+Examples:
+
+response 1: {
+	"matches": ["assiduous", "dilligent"]
+}
+
+response 2: {
+	"matches": ["opulent", "ostentatious", "lavish"]
+}
+'''
 
 
 class Word:
@@ -56,12 +73,12 @@ def loadData():
 		return {}
 
 
-def fetch(word=None):
-	if word is None:
-		word = input('Word? ')
+def callAPI(payload):
+	response = requests.post(url=URL, json=payload)
+	return json.loads(response.json()['response'])
 
 
-	word = str(body.find(class_= WORD_ID).contents[0])
+def fetch(word):
 
 	pron = ''
 	for i in body.find(class_= PRON_ID).contents:
@@ -131,32 +148,29 @@ def findByWord(word):
 			fetch(word)
 
 
-def keyWordSearch(searchWords):
-	temp = []
-	for w in words:
-		if (w.word.find(searchWords) != -1):
-			temp.append(w)
-		elif (any(map(lambda x: x.find(searchWords) != -1, w.meaning))):
-			temp.append(w)
-		elif (w.inter.find(searchWords) != -1):
-			temp.append(w)
-		elif (any(map(lambda x: x.find(searchWords) != -1, w.synonyms))):
-			temp.append(w)
+def findByDescription(description):
+	matches = []
+	BATCH_SIZE = 200
+	keys = list(words.keys())
+	for i in range(0, Word.n, BATCH_SIZE):
+		matches.extend(callAPI({
+			'model': MODEL,
+			'system': SYSTEM_PROMPT2,
+			'prompt': '{' + f'"words": ["{"\", \"".join(keys[i:i+BATCH_SIZE])}"], "description": "{description}"' + '}',
+			'temperature': 0.0,
+			'format': 'json',
+			'stream': False
+		})['matches'])
 
-	if temp == []:
+	if matches == []:
 		print('\nNo matching words found')
-		if len(searchWords.split(' ')) == 1:
-			ch = input('Would you like to add it?(Press y if yes) ').lower()
-			if ch == 'y':
-				fetch(searchWords)
-		return
-
-	print('\n', list(map(lambda x: x.word, temp)), sep='')
-	for w in temp:
-		ch = input('\nContinue with the definitions?(Press n if no) ').lower()
-		if ch == 'n':
-			break
-		print(w)
+	else:
+		print(f'\n{matches}')
+		for word in matches:
+			ch = input('\nContinue with the definitions?(Press n if no) ').lower()
+			if ch == 'n':
+				break
+			print(words[word])
 
 
 def update(word):
@@ -170,8 +184,8 @@ def update(word):
 
 def test(reverse):
 	qCnt = int(input('How many questions? '))
-	index = int(input('From how many recent words?(Press 0 to include the entire Vocab) '))
-	temp = words[-index:]
+	index = int(input('Sample from how many recent words?(Press 0 to include the entire Vocab) '))
+	temp = list(words.values())[-index:]
 	random.shuffle(temp)
 	for i in range(min(qCnt, len(temp))):
 		if reverse:
@@ -182,34 +196,36 @@ def test(reverse):
 		print(temp[i])
 
 
-def recall(temp):
-	wordCount = len(temp)
-	while wordCount > 0:
-		x = input(f'Word?({wordCount} words left. Press n to stop) ').lower()
-		if x == 'n':
+def recall(recalledWords):
+	remaining = Word.n - len(recalledWords)
+	while remaining > 0:
+		word = input(f'Word?({remaining} words left. Press n to stop) ').lower()
+		if word == 'n':
 			break
-		for w in temp:
-			if w.word == x:
-				temp.remove(w)
-				wordCount -= 1
-				break
+		if word in words:
+			if word not in recalledWords:
+				recalledWords.add(word)
+				remaining -= 1
+			else:
+				print('You already recalled this word')
 		else:
 			print('Word not found')
-	print(f'\nYou recalled {len(words) - wordCount} words')
-	return temp
+	print(f'\nYou recalled {Word.n - remaining} words')
+	if len(recalledWords) == Word.n:
+		recalledWords.clear()
 
 
 def dispVocab():
-	for i, w in enumerate(words):
-		if i % 5 == 0:
+	for w in words.values():
+		if w.index % 5 == 0:
 			print()
-		print('{:<3} {:<19}'.format(i, w.word), end='')
+		print('{:<3} {:<19}'.format(w.index, w.word), end='')
 	print(f'\n\nThere are {len(words)} words in your vocabulary')
 
 
 def main():
 	opCount = 0
-	tempWords = None
+	recalledWords = set()
 
 	while True:
 		opCount += 1
@@ -218,7 +234,7 @@ def main():
 1. Take a test
 2. Take a reverse test
 3. Search for a word in your vocab
-4. Search for a word through keywords in its meaning
+4. Search for a word in your vocab by describing it
 5. Look up a new word online
 6. Explore your vocab
 7. Update a word
@@ -234,7 +250,7 @@ def main():
 			elif ch == '3':
 				findByWord(input('Word? '))
 			elif ch == '4':
-				keyWordSearch(input('Keyword(s)? '))
+				findByDescription(input('How would you describe the word? '))
 			elif ch == '5':
 				fetch()
 			elif ch == '6':
@@ -244,9 +260,7 @@ def main():
 			elif ch == '8':
 				storeData()
 			elif ch == '9':
-				if not tempWords:
-					tempWords = words[:]
-				tempWords = recall(tempWords)
+				recall(recalledWords)
 			else:
 				break
 		except Exception as e:
