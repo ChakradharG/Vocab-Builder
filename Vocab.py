@@ -110,8 +110,18 @@ def loadData():
 
 
 def callAPI(payload):
-	response = requests.post(url=URL, json=payload)
-	return json.loads(response.json()['response'])
+	try:
+		response = requests.post(url=URL, json=payload)
+		response.raise_for_status()
+		return json.loads(response.json()['response'])
+	except json.JSONDecodeError:
+		ch = input('The model did not return valid JSON, do you want to try again?(Press y if yes) ').lower()
+		if ch == 'y':
+			return callAPI(payload)
+		else:
+			raise Exception('Invalid JSON Error')
+	except:
+		raise Exception('Ollama is not running')
 
 
 def fetch(word):
@@ -240,7 +250,7 @@ def main():
 2. Take a reverse test
 3. Search for a word in your vocab
 4. Search for a word in your vocab by describing it
-5. Look up a new word online
+5. Look up the definition of a new word
 6. Explore your vocab
 7. Update a word
 8. Save progress made in current session
@@ -257,19 +267,20 @@ def main():
 			elif ch == '4':
 				findByDescription(input('How would you describe the word? '))
 			elif ch == '5':
-				fetch()
+				fetch(input('Word? '))
 			elif ch == '6':
 				dispVocab()
 			elif ch == '7':
 				update(input('Word? '))
 			elif ch == '8':
 				storeData()
+				opCount = 0
 			elif ch == '9':
 				recall(recalledWords)
 			else:
 				break
 		except Exception as e:
-			print(e)
+			print(f'Encountered error: {e}')
 			ch = input('\nWould you like to exit?(Press y if yes) ').lower()
 			if ch == 'y':
 				break
