@@ -110,12 +110,14 @@ def loadData():
 
 
 def callAPI(payload):
+	if MODEL == '':
+		raise Exception('Model name not set, please edit the file and run again')
 	try:
 		response = requests.post(url=URL, json=payload)
 		response.raise_for_status()
 		return json.loads(response.json()['response'])
 	except json.JSONDecodeError:
-		ch = input('The model did not return valid JSON, do you want to try again?(Press y if yes) ').lower()
+		ch = input('The model did not return valid JSON, do you want to try again? (y/[n]) ').lower()
 		if ch == 'y':
 			return callAPI(payload)
 		else:
@@ -144,7 +146,7 @@ def fetch(word):
 	print(newW)
 	newW.inter = input('Interpretation? ')
 
-	ch = input('Would you like to save this word?(Press y if yes) ').lower()
+	ch = input('Would you like to save this word? (y/[n]) ').lower()
 	if ch == 'y':
 		w = words.get(word, None)
 		if w is not None:
@@ -158,7 +160,7 @@ def findByWord(word):
 	if w is not None:
 		print(w)
 	else:
-		ch = input('Word not found. Would you like to add it?(Press y if yes) ').lower()
+		ch = input('Word not found. Would you like to add it? (y/[n]) ').lower()
 		if ch == 'y':
 			fetch(word)
 
@@ -182,7 +184,7 @@ def findByDescription(description):
 	else:
 		print(f'\n{matches}')
 		for word in matches:
-			ch = input('\nContinue with the definitions?(Press n if no) ').lower()
+			ch = input('\nContinue with the definitions? ([y]/n) ').lower()
 			if ch == 'n':
 				break
 			print(words[word])
@@ -199,15 +201,16 @@ def update(word):
 
 def test(reverse):
 	qCnt = int(input('How many questions? '))
-	index = int(input('Sample from how many recent words?(Press 0 to include the entire Vocab) '))
+	index = int(input('Sample from how many recent words? (Press 0 to sample from entire Vocab) '))
 	temp = list(words.values())[-index:]
 	random.shuffle(temp)
 	for i in range(min(qCnt, len(temp))):
 		if reverse:
 			print(f'\n\n{temp[i].inter}\n', f'\n{temp[i].meaning[:-1]}')
+			input('Word? (Press Enter for the answer) ')
 		else:
 			print(temp[i].word)
-		input('Check (Press Enter) ')
+			input('Meaning? (Press Enter for the answer) ')
 		print(temp[i])
 
 
@@ -281,7 +284,7 @@ def main():
 				break
 		except Exception as e:
 			print(f'Encountered error: {e}')
-			ch = input('\nWould you like to exit?(Press y if yes) ').lower()
+			ch = input('\nWould you like to exit? (y/[n]) ').lower()
 			if ch == 'y':
 				break
 		if opCount == 5:
